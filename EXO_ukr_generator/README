@@ -1,0 +1,26 @@
+#EXO ukr generator
+
+This software generates automatically specialized C code for a given architecture with the EXO compiler.
+Currently only ARM neon codes are available.
+
+This software need the Exo with fp16 Neon intrinsics support that is available at https://anonymous.4open.science/r/exo-C106
+
+#The directory is composed by:
+- README       -> This file
+- Makefile     -> The file that generates the microkernel and compiles the test
+- main.c       -> The performance test
+- base_ukr.py  -> The Python Exo file that generates the microkernel
+- blis.py      -> The Python file that calls the micro-kernel generator
+
+
+#How to use it
+#First add the current directory to the PYTHONPATH environment variable
+export PYTHONPATH=$PWD:$PYTHONPATH
+make && ./uk    
+
+
+
+
+
+
+

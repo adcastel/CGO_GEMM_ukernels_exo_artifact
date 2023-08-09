@@ -1,0 +1,43 @@
+name: Gemmini CI
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+jobs:
+  gemmini:
+    runs-on: ubuntu-20.04
+
+    container:
+      image: ghcr.io/exo-lang/gemmini:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.github_token }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          apt-get remove -y cmake
+          apt-get install -y ninja-build
+          python -m pip install -r requirements.txt
+          python -m pip install cmake build
+
+      - name: Install exo
+        run: |
+          python -m build
+          python -m pip install dist/*.whl
+
+      - name: Configure GEMMINI tests
+        run: cmake -G Ninja -S apps/gemmini -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build GEMMINI tests
+        run: cmake --build build --verbose
+
+      - name: Run GEMMINI tests
+        run: ctest -V
+        working-directory: build

@@ -1,0 +1,9 @@
+#Hardware
+- ARM with support of ARM NEON. An ARMv8 is desirable.
+
+#For EXO
+- Python3.9 or higher
+- Pip3.9 or higher
+
+#For Neon microkernels
+- GCC 10 or higher

@@ -1,0 +1,8 @@
+*.o
+__pycache__
+*.s
+*.d
+uk
+uk.*
+.DS_Store
+

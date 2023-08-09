@@ -1,0 +1,23 @@
+C test for performing microkernels over ARMv8 processors
+
+Current supported microkernels
+- BLIS  -> (need BLIS v0.9 from https://github.com/flame/blis) Assembly micro-kernel
+- QBLIS -> Neon intrinsic base Microkernel
+- EXO   -> Automathic generated micro-kernel with the Exo tool (uk.* files)  
+
+How to use:
+
+make
+./test_uk_blis OPT MR NR KC_I KC_E KC_S T E 
+
+where.
+
+- OPT admit: BLIS or QBLIS or EXO  
+- MR is the M dimension of C
+- NR is the N dimension of C
+- KC_I is the initial K value of dimension of A and B 
+- KC_E is the end K value of dimension of A and B 
+- KC_S is the step of the K value of dimension of A and B 
+- T is the minimum time of execution
+- E id for checking error or not (T|E) 
+

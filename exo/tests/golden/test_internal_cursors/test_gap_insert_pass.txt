@@ -1,0 +1,8 @@
+def foo(n: size, m: size):
+    for i in seq(0, n):
+        for j in seq(0, m):
+            x: f32 @ DRAM
+            x = 0.0
+            pass
+            y: f32 @ DRAM
+            y = 1.1

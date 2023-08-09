@@ -1,0 +1,779 @@
+
+#pragma once
+#ifndef TEST_CASE_H
+#define TEST_CASE_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+#include <stdint.h>
+#include <stdbool.h>
+
+// Compiler feature macros adapted from Hedley (public domain)
+// https://github.com/nemequ/hedley
+
+#if defined(__has_builtin)
+#  define EXO_HAS_BUILTIN(builtin) __has_builtin(builtin)
+#else
+#  define EXO_HAS_BUILTIN(builtin) (0)
+#endif
+
+#if EXO_HAS_BUILTIN(__builtin_assume)
+#  define EXO_ASSUME(expr) __builtin_assume(expr)
+#elif EXO_HAS_BUILTIN(__builtin_unreachable)
+#  define EXO_ASSUME(expr) \
+      ((void)((expr) ? 1 : (__builtin_unreachable(), 1)))
+#else
+#  define EXO_ASSUME(expr) ((void)(expr))
+#endif
+
+
+struct exo_win_1f32{
+    float * const data;
+    const int_fast32_t strides[1];
+};
+struct exo_win_1f32c{
+    const float * const data;
+    const int_fast32_t strides[1];
+};
+struct exo_win_2f32{
+    float * const data;
+    const int_fast32_t strides[2];
+};
+struct exo_win_2f32c{
+    const float * const data;
+    const int_fast32_t strides[2];
+};
+// sgemm_exo(
+//     M : size,
+//     N : size,
+//     K : size,
+//     A : f32[M, K] @DRAM,
+//     B : f32[K, N] @DRAM,
+//     C : f32[M, N] @DRAM
+// )
+void sgemm_exo( void *ctxt, int_fast32_t M, int_fast32_t N, int_fast32_t K, const float* A, const float* B, float* C );
+
+
+
+#ifdef __cplusplus
+}
+#endif
+#endif  // TEST_CASE_H
+
+#include "test_case.h"
+
+
+
+#include <immintrin.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+
+
+// bottom_panel_kernel_scheduled(
+//     M : size,
+//     K : size,
+//     A : [f32][M, K] @DRAM,
+//     B : [f32][K, 64] @DRAM,
+//     C : [f32][M, 64] @DRAM
+// )
+static void bottom_panel_kernel_scheduled( void *ctxt, int_fast32_t M, int_fast32_t K, struct exo_win_2f32c A, struct exo_win_2f32c B, struct exo_win_2f32 C );
+
+// right_panel_kernel_scheduled(
+//     N : size,
+//     K : size,
+//     A : [f32][6, K] @DRAM,
+//     B : [f32][K, N] @DRAM,
+//     C : [f32][6, N] @DRAM
+// )
+static void right_panel_kernel_scheduled( void *ctxt, int_fast32_t N, int_fast32_t K, struct exo_win_2f32c A, struct exo_win_2f32c B, struct exo_win_2f32 C );
+
+// sgemm_above_kernel(
+//     M : size,
+//     N : size,
+//     K : size,
+//     A : [f32][M, K] @DRAM,
+//     B : [f32][K, N] @DRAM,
+//     C : [f32][M, N] @DRAM
+// )
+static void sgemm_above_kernel( void *ctxt, int_fast32_t M, int_fast32_t N, int_fast32_t K, struct exo_win_2f32c A, struct exo_win_2f32c B, struct exo_win_2f32 C );
+
+// sgemm_kernel_avx512_1x4(
+//     K : size,
+//     A : [f32][1, K] @DRAM,
+//     B : [f32][K, 64] @DRAM,
+//     C : [f32][1, 64] @DRAM
+// )
+static void sgemm_kernel_avx512_1x4( void *ctxt, int_fast32_t K, struct exo_win_2f32c A, struct exo_win_2f32c B, struct exo_win_2f32 C );
+
+// sgemm_kernel_avx512_2x4(
+//     K : size,
+//     A : [f32][2, K] @DRAM,
+//     B : [f32][K, 64] @DRAM,
+//     C : [f32][2, 64] @DRAM
+// )
+static void sgemm_kernel_avx512_2x4( void *ctxt, int_fast32_t K, struct exo_win_2f32c A, struct exo_win_2f32c B, struct exo_win_2f32 C );
+
+// sgemm_kernel_avx512_3x4(
+//     K : size,
+//     A : [f32][3, K] @DRAM,
+//     B : [f32][K, 64] @DRAM,
+//     C : [f32][3, 64] @DRAM
+// )
+static void sgemm_kernel_avx512_3x4( void *ctxt, int_fast32_t K, struct exo_win_2f32c A, struct exo_win_2f32c B, struct exo_win_2f32 C );
+
+// sgemm_kernel_avx512_4x4(
+//     K : size,
+//     A : [f32][4, K] @DRAM,
+//     B : [f32][K, 64] @DRAM,
+//     C : [f32][4, 64] @DRAM
+// )
+static void sgemm_kernel_avx512_4x4( void *ctxt, int_fast32_t K, struct exo_win_2f32c A, struct exo_win_2f32c B, struct exo_win_2f32 C );
+
+// sgemm_kernel_avx512_5x4(
+//     K : size,
+//     A : [f32][5, K] @DRAM,
+//     B : [f32][K, 64] @DRAM,
+//     C : [f32][5, 64] @DRAM
+// )
+static void sgemm_kernel_avx512_5x4( void *ctxt, int_fast32_t K, struct exo_win_2f32c A, struct exo_win_2f32c B, struct exo_win_2f32 C );
+
+// sgemm_kernel_avx512_6x4(
+//     K : size,
+//     A : [f32][6, K] @DRAM,
+//     B : [f32][K, 64] @DRAM,
+//     C : [f32][6, 64] @DRAM
+// )
+static void sgemm_kernel_avx512_6x4( void *ctxt, int_fast32_t K, struct exo_win_2f32c A, struct exo_win_2f32c B, struct exo_win_2f32 C );
+
+// bottom_panel_kernel_scheduled(
+//     M : size,
+//     K : size,
+//     A : [f32][M, K] @DRAM,
+//     B : [f32][K, 64] @DRAM,
+//     C : [f32][M, 64] @DRAM
+// )
+static void bottom_panel_kernel_scheduled( void *ctxt, int_fast32_t M, int_fast32_t K, struct exo_win_2f32c A, struct exo_win_2f32c B, struct exo_win_2f32 C ) {
+EXO_ASSUME(M >= 1);
+EXO_ASSUME(K >= 1);
+// assert stride(A, 1) == 1
+// assert stride(B, 1) == 1
+// assert stride(C, 1) == 1
+EXO_ASSUME(M < 6);
+if (M == 1) {
+  sgemm_kernel_avx512_1x4(ctxt,K,(struct exo_win_2f32c){ &A.data[0], { A.strides[0], 1 } },(struct exo_win_2f32c){ &B.data[0], { B.strides[0], 1 } },(struct exo_win_2f32){ &C.data[0], { C.strides[0], 1 } });
+} else {
+  if (M == 2) {
+    sgemm_kernel_avx512_2x4(ctxt,K,(struct exo_win_2f32c){ &A.data[0], { A.strides[0], 1 } },(struct exo_win_2f32c){ &B.data[0], { B.strides[0], 1 } },(struct exo_win_2f32){ &C.data[0], { C.strides[0], 1 } });
+  } else {
+    if (M == 3) {
+      sgemm_kernel_avx512_3x4(ctxt,K,(struct exo_win_2f32c){ &A.data[0], { A.strides[0], 1 } },(struct exo_win_2f32c){ &B.data[0], { B.strides[0], 1 } },(struct exo_win_2f32){ &C.data[0], { C.strides[0], 1 } });
+    } else {
+      if (M == 4) {
+        sgemm_kernel_avx512_4x4(ctxt,K,(struct exo_win_2f32c){ &A.data[0], { A.strides[0], 1 } },(struct exo_win_2f32c){ &B.data[0], { B.strides[0], 1 } },(struct exo_win_2f32){ &C.data[0], { C.strides[0], 1 } });
+      } else {
+        if (M == 5) {
+          sgemm_kernel_avx512_5x4(ctxt,K,(struct exo_win_2f32c){ &A.data[0], { A.strides[0], 1 } },(struct exo_win_2f32c){ &B.data[0], { B.strides[0], 1 } },(struct exo_win_2f32){ &C.data[0], { C.strides[0], 1 } });
+        } else {
+          for (int_fast32_t k = 0; k < K; k++) {
+            for (int_fast32_t i = 0; i < M; i++) {
+              for (int_fast32_t j = 0; j < 64; j++) {
+                C.data[i * C.strides[0] + j] += A.data[i * A.strides[0] + k] * B.data[k * B.strides[0] + j];
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+}
+
+
+/* relying on the following instruction..."
+mm512_fmadd_ps(A,B,C)
+{C_data} = _mm512_fmadd_ps({A_data}, {B_data}, {C_data});
+*/
+
+/* relying on the following instruction..."
+mm512_loadu_ps(dst,src)
+{dst_data} = _mm512_loadu_ps(&{src_data});
+*/
+
+/* relying on the following instruction..."
+mm512_mask_fmadd_ps(N,A,B,C)
+{C_data} = _mm512_mask_fmadd_ps({A_data}, ((1 << {N}) - 1), {B_data}, {C_data});
+*/
+
+/* relying on the following instruction..."
+mm512_mask_set1_ps(N,dst,src)
+{dst_data} = _mm512_set1_ps({src_data});
+*/
+
+/* relying on the following instruction..."
+mm512_mask_storeu_ps(N,dst,src)
+_mm512_mask_storeu_ps(&{dst_data}, ((1 << {N}) - 1), {src_data});
+*/
+
+/* relying on the following instruction..."
+mm512_maskz_loadu_ps(N,dst,src)
+{dst_data} = _mm512_maskz_loadu_ps(((1 << {N}) - 1), &{src_data});
+*/
+
+/* relying on the following instruction..."
+mm512_set1_ps(dst,src)
+{dst_data} = _mm512_set1_ps({src_data});
+*/
+
+/* relying on the following instruction..."
+mm512_storeu_ps(dst,src)
+_mm512_storeu_ps(&{dst_data}, {src_data});
+*/
+// right_panel_kernel_scheduled(
+//     N : size,
+//     K : size,
+//     A : [f32][6, K] @DRAM,
+//     B : [f32][K, N] @DRAM,
+//     C : [f32][6, N] @DRAM
+// )
+static void right_panel_kernel_scheduled( void *ctxt, int_fast32_t N, int_fast32_t K, struct exo_win_2f32c A, struct exo_win_2f32c B, struct exo_win_2f32 C ) {
+EXO_ASSUME(N >= 1);
+EXO_ASSUME(K >= 1);
+// assert stride(A, 1) == 1
+// assert stride(B, 1) == 1
+// assert stride(C, 1) == 1
+EXO_ASSUME(((N) / (16)) < 4);
+if (((N) / (16)) == 0) {
+  __m512 C_reg[6][1];
+  __m512 C_reg_1[6];
+  for (int_fast32_t i = 0; i < 6; i++) {
+    C_reg_1[i] = _mm512_maskz_loadu_ps(((1 << (N)) - 1), &C.data[(i) * (C.strides[0])]);
+  }
+  for (int_fast32_t k = 0; k < K; k++) {
+    for (int_fast32_t i = 0; i < 6; i++) {
+      __m512 A_reg2;
+      A_reg2 = _mm512_set1_ps(A.data[(i) * (A.strides[0]) + k]);
+      __m512 B_reg2;
+      B_reg2 = _mm512_maskz_loadu_ps(((1 << (N)) - 1), &B.data[(k) * (B.strides[0])]);
+      C_reg_1[i] = _mm512_mask_fmadd_ps(A_reg2, ((1 << (N)) - 1), B_reg2, C_reg_1[i]);
+    }
+  }
+  for (int_fast32_t i = 0; i < 6; i++) {
+    _mm512_mask_storeu_ps(&C.data[(i) * (C.strides[0])], ((1 << (N)) - 1), C_reg_1[i]);
+  }
+} else {
+  if (((N) / (16)) == 1) {
+    __m512 C_reg[6][2];
+    __m512 C_reg_1[6];
+    for (int_fast32_t i = 0; i < 6; i++) {
+      for (int_fast32_t jo = 0; jo < 1; jo++) {
+        C_reg[i][jo] = _mm512_loadu_ps(&C.data[(i) * (C.strides[0]) + 16 * jo]);
+      }
+      C_reg_1[i] = _mm512_maskz_loadu_ps(((1 << (N % 16)) - 1), &C.data[(i) * (C.strides[0]) + 16]);
+    }
+    for (int_fast32_t k = 0; k < K; k++) {
+      for (int_fast32_t i = 0; i < 6; i++) {
+        for (int_fast32_t jo = 0; jo < 1; jo++) {
+          __m512 A_reg;
+          A_reg = _mm512_set1_ps(A.data[(i) * (A.strides[0]) + k]);
+          __m512 B_reg;
+          B_reg = _mm512_loadu_ps(&B.data[(k) * (B.strides[0]) + 16 * jo]);
+          C_reg[i][jo] = _mm512_fmadd_ps(A_reg, B_reg, C_reg[i][jo]);
+        }
+        __m512 A_reg2;
+        A_reg2 = _mm512_set1_ps(A.data[(i) * (A.strides[0]) + k]);
+        __m512 B_reg2;
+        B_reg2 = _mm512_maskz_loadu_ps(((1 << (N % 16)) - 1), &B.data[(k) * (B.strides[0]) + 16]);
+        C_reg_1[i] = _mm512_mask_fmadd_ps(A_reg2, ((1 << (N % 16)) - 1), B_reg2, C_reg_1[i]);
+      }
+    }
+    for (int_fast32_t i = 0; i < 6; i++) {
+      for (int_fast32_t jo = 0; jo < 1; jo++) {
+        _mm512_storeu_ps(&C.data[(i) * (C.strides[0]) + 16 * jo], C_reg[i][jo]);
+      }
+      _mm512_mask_storeu_ps(&C.data[(i) * (C.strides[0]) + 16], ((1 << (N % 16)) - 1), C_reg_1[i]);
+    }
+  } else {
+    if (((N) / (16)) == 2) {
+      __m512 C_reg[6][3];
+      __m512 C_reg_1[6];
+      for (int_fast32_t i = 0; i < 6; i++) {
+        for (int_fast32_t jo = 0; jo < 2; jo++) {
+          C_reg[i][jo] = _mm512_loadu_ps(&C.data[(i) * (C.strides[0]) + 16 * jo]);
+        }
+        C_reg_1[i] = _mm512_maskz_loadu_ps(((1 << (N % 16)) - 1), &C.data[(i) * (C.strides[0]) + 32]);
+      }
+      for (int_fast32_t k = 0; k < K; k++) {
+        for (int_fast32_t i = 0; i < 6; i++) {
+          for (int_fast32_t jo = 0; jo < 2; jo++) {
+            __m512 A_reg;
+            A_reg = _mm512_set1_ps(A.data[(i) * (A.strides[0]) + k]);
+            __m512 B_reg;
+            B_reg = _mm512_loadu_ps(&B.data[(k) * (B.strides[0]) + 16 * jo]);
+            C_reg[i][jo] = _mm512_fmadd_ps(A_reg, B_reg, C_reg[i][jo]);
+          }
+          __m512 A_reg2;
+          A_reg2 = _mm512_set1_ps(A.data[(i) * (A.strides[0]) + k]);
+          __m512 B_reg2;
+          B_reg2 = _mm512_maskz_loadu_ps(((1 << (N % 16)) - 1), &B.data[(k) * (B.strides[0]) + 32]);
+          C_reg_1[i] = _mm512_mask_fmadd_ps(A_reg2, ((1 << (N % 16)) - 1), B_reg2, C_reg_1[i]);
+        }
+      }
+      for (int_fast32_t i = 0; i < 6; i++) {
+        for (int_fast32_t jo = 0; jo < 2; jo++) {
+          _mm512_storeu_ps(&C.data[(i) * (C.strides[0]) + 16 * jo], C_reg[i][jo]);
+        }
+        _mm512_mask_storeu_ps(&C.data[(i) * (C.strides[0]) + 32], ((1 << (N % 16)) - 1), C_reg_1[i]);
+      }
+    } else {
+      if (((N) / (16)) == 3) {
+        __m512 C_reg[6][4];
+        __m512 C_reg_1[6];
+        for (int_fast32_t i = 0; i < 6; i++) {
+          for (int_fast32_t jo = 0; jo < 3; jo++) {
+            C_reg[i][jo] = _mm512_loadu_ps(&C.data[(i) * (C.strides[0]) + 16 * jo]);
+          }
+          C_reg_1[i] = _mm512_maskz_loadu_ps(((1 << (N % 16)) - 1), &C.data[(i) * (C.strides[0]) + 48]);
+        }
+        for (int_fast32_t k = 0; k < K; k++) {
+          for (int_fast32_t i = 0; i < 6; i++) {
+            for (int_fast32_t jo = 0; jo < 3; jo++) {
+              __m512 A_reg;
+              A_reg = _mm512_set1_ps(A.data[(i) * (A.strides[0]) + k]);
+              __m512 B_reg;
+              B_reg = _mm512_loadu_ps(&B.data[(k) * (B.strides[0]) + 16 * jo]);
+              C_reg[i][jo] = _mm512_fmadd_ps(A_reg, B_reg, C_reg[i][jo]);
+            }
+            __m512 A_reg2;
+            A_reg2 = _mm512_set1_ps(A.data[(i) * (A.strides[0]) + k]);
+            __m512 B_reg2;
+            B_reg2 = _mm512_maskz_loadu_ps(((1 << (N % 16)) - 1), &B.data[(k) * (B.strides[0]) + 48]);
+            C_reg_1[i] = _mm512_mask_fmadd_ps(A_reg2, ((1 << (N % 16)) - 1), B_reg2, C_reg_1[i]);
+          }
+        }
+        for (int_fast32_t i = 0; i < 6; i++) {
+          for (int_fast32_t jo = 0; jo < 3; jo++) {
+            _mm512_storeu_ps(&C.data[(i) * (C.strides[0]) + 16 * jo], C_reg[i][jo]);
+          }
+          _mm512_mask_storeu_ps(&C.data[(i) * (C.strides[0]) + 48], ((1 << (N % 16)) - 1), C_reg_1[i]);
+        }
+      } else {
+        __m512 C_reg[6][((N / 16) + 1)];
+        __m512 C_reg_1[6];
+        for (int_fast32_t i = 0; i < 6; i++) {
+          for (int_fast32_t jo = 0; jo < ((N) / (16)); jo++) {
+            C_reg[i][jo] = _mm512_loadu_ps(&C.data[(i) * (C.strides[0]) + 16 * jo]);
+          }
+          C_reg_1[i] = _mm512_maskz_loadu_ps(((1 << (N % 16)) - 1), &C.data[(i) * (C.strides[0]) + 16 * (N / 16)]);
+        }
+        for (int_fast32_t k = 0; k < K; k++) {
+          for (int_fast32_t i = 0; i < 6; i++) {
+            for (int_fast32_t jo = 0; jo < ((N) / (16)); jo++) {
+              __m512 A_reg;
+              A_reg = _mm512_set1_ps(A.data[(i) * (A.strides[0]) + k]);
+              __m512 B_reg;
+              B_reg = _mm512_loadu_ps(&B.data[(k) * (B.strides[0]) + 16 * jo]);
+              C_reg[i][jo] = _mm512_fmadd_ps(A_reg, B_reg, C_reg[i][jo]);
+            }
+            __m512 A_reg2;
+            A_reg2 = _mm512_set1_ps(A.data[(i) * (A.strides[0]) + k]);
+            __m512 B_reg2;
+            B_reg2 = _mm512_maskz_loadu_ps(((1 << (N % 16)) - 1), &B.data[(k) * (B.strides[0]) + 16 * (N / 16)]);
+            C_reg_1[i] = _mm512_mask_fmadd_ps(A_reg2, ((1 << (N % 16)) - 1), B_reg2, C_reg_1[i]);
+          }
+        }
+        for (int_fast32_t i = 0; i < 6; i++) {
+          for (int_fast32_t jo = 0; jo < ((N) / (16)); jo++) {
+            _mm512_storeu_ps(&C.data[(i) * (C.strides[0]) + 16 * jo], C_reg[i][jo]);
+          }
+          _mm512_mask_storeu_ps(&C.data[(i) * (C.strides[0]) + 16 * (N / 16)], ((1 << (N % 16)) - 1), C_reg_1[i]);
+        }
+      }
+    }
+  }
+}
+}
+
+// sgemm_above_kernel(
+//     M : size,
+//     N : size,
+//     K : size,
+//     A : [f32][M, K] @DRAM,
+//     B : [f32][K, N] @DRAM,
+//     C : [f32][M, N] @DRAM
+// )
+static void sgemm_above_kernel( void *ctxt, int_fast32_t M, int_fast32_t N, int_fast32_t K, struct exo_win_2f32c A, struct exo_win_2f32c B, struct exo_win_2f32 C ) {
+EXO_ASSUME(M >= 1);
+EXO_ASSUME(N >= 1);
+EXO_ASSUME(K >= 1);
+// assert stride(A, 1) == 1
+// assert stride(B, 1) == 1
+// assert stride(C, 1) == 1
+for (int_fast32_t io = 0; io < ((M) / (6)); io++) {
+  for (int_fast32_t jo = 0; jo < ((N) / (64)); jo++) {
+    sgemm_kernel_avx512_6x4(ctxt,K,(struct exo_win_2f32c){ &A.data[(6 * io) * (A.strides[0])], { A.strides[0], 1 } },(struct exo_win_2f32c){ &B.data[64 * jo], { B.strides[0], 1 } },(struct exo_win_2f32){ &C.data[(6 * io) * (C.strides[0]) + 64 * jo], { C.strides[0], 1 } });
+  }
+}
+if (N % 64 > 0) {
+  for (int_fast32_t io = 0; io < ((M) / (6)); io++) {
+    right_panel_kernel_scheduled(ctxt,N % 64,K,(struct exo_win_2f32c){ &A.data[(6 * io) * (A.strides[0])], { A.strides[0], 1 } },(struct exo_win_2f32c){ &B.data[64 * (N / 64)], { B.strides[0], 1 } },(struct exo_win_2f32){ &C.data[(6 * io) * (C.strides[0]) + 64 * (N / 64)], { C.strides[0], 1 } });
+  }
+}
+if (M % 6 > 0) {
+  for (int_fast32_t jo = 0; jo < ((N) / (64)); jo++) {
+    bottom_panel_kernel_scheduled(ctxt,M % 6,K,(struct exo_win_2f32c){ &A.data[(6 * (M / 6)) * (A.strides[0])], { A.strides[0], 1 } },(struct exo_win_2f32c){ &B.data[64 * jo], { B.strides[0], 1 } },(struct exo_win_2f32){ &C.data[(6 * (M / 6)) * (C.strides[0]) + 64 * jo], { C.strides[0], 1 } });
+  }
+  if (N % 64 > 0) {
+    for (int_fast32_t k = 0; k < K; k++) {
+      for (int_fast32_t ii = 0; ii < M % 6; ii++) {
+        for (int_fast32_t ji = 0; ji < N % 64; ji++) {
+          C.data[(ii + (M / 6) * 6) * C.strides[0] + ji + (N / 64) * 64] += A.data[(ii + (M / 6) * 6) * A.strides[0] + k] * B.data[k * B.strides[0] + ji + (N / 64) * 64];
+        }
+      }
+    }
+  }
+}
+}
+
+// sgemm_exo(
+//     M : size,
+//     N : size,
+//     K : size,
+//     A : f32[M, K] @DRAM,
+//     B : f32[K, N] @DRAM,
+//     C : f32[M, N] @DRAM
+// )
+void sgemm_exo( void *ctxt, int_fast32_t M, int_fast32_t N, int_fast32_t K, const float* A, const float* B, float* C ) {
+EXO_ASSUME(M >= 1);
+EXO_ASSUME(N >= 1);
+EXO_ASSUME(K >= 1);
+// assert stride(A, 1) == 1
+// assert stride(B, 1) == 1
+// assert stride(C, 1) == 1
+static float A1_cache[264 * 512];
+static float B1_cache[512 * 64];
+for (int_fast32_t ko = 0; ko < ((K) / (512)); ko++) {
+  for (int_fast32_t io = 0; io < ((M) / (264)); io++) {
+    for (int_fast32_t i0 = 0; i0 < 264; i0++) {
+      for (int_fast32_t i1 = 0; i1 < 512; i1++) {
+        A1_cache[i0 * 512 + i1] = A[(i0 + 264 * io) * K + i1 + 512 * ko];
+      }
+    }
+    for (int_fast32_t jo = 0; jo < ((N) / (64)); jo++) {
+      for (int_fast32_t i0 = 0; i0 < 512; i0++) {
+        for (int_fast32_t i1 = 0; i1 < 64; i1++) {
+          B1_cache[i0 * 64 + i1] = B[(i0 + 512 * ko) * N + i1 + 64 * jo];
+        }
+      }
+      sgemm_above_kernel(ctxt,264,64,512,(struct exo_win_2f32c){ &A1_cache[0], { 512, 1 } },(struct exo_win_2f32c){ &B1_cache[0], { 64, 1 } },(struct exo_win_2f32){ &C[(264 * io) * N + 64 * jo], { N, 1 } });
+    }
+  }
+}
+if (N % 64 > 0) {
+  for (int_fast32_t ko = 0; ko < ((K) / (512)); ko++) {
+    static float B2_cache[512 * 64];
+    for (int_fast32_t i0 = 0; i0 < 512; i0++) {
+      for (int_fast32_t i1 = 0; i1 < N - 64 * ((N) / (64)); i1++) {
+        B2_cache[i0 * 64 + i1] = B[(i0 + 512 * ko) * N + 64 * (N / 64) + i1];
+      }
+    }
+    for (int_fast32_t io = 0; io < ((M) / (264)); io++) {
+      sgemm_above_kernel(ctxt,264,N % 64,512,(struct exo_win_2f32c){ &A[(264 * io) * K + 512 * ko], { K, 1 } },(struct exo_win_2f32c){ &B2_cache[0], { 64, 1 } },(struct exo_win_2f32){ &C[(264 * io) * N + 64 * (N / 64)], { N, 1 } });
+    }
+  }
+}
+if (M % 264 > 0) {
+  for (int_fast32_t ko = 0; ko < ((K) / (512)); ko++) {
+    for (int_fast32_t jo = 0; jo < ((N) / (64)); jo++) {
+      static float B3_cache[512 * 64];
+      for (int_fast32_t i0 = 0; i0 < 512; i0++) {
+        for (int_fast32_t i1 = 0; i1 < 64; i1++) {
+          B3_cache[i0 * 64 + i1] = B[(i0 + 512 * ko) * N + i1 + 64 * jo];
+        }
+      }
+      sgemm_above_kernel(ctxt,M % 264,64,512,(struct exo_win_2f32c){ &A[(264 * (M / 264)) * K + 512 * ko], { K, 1 } },(struct exo_win_2f32c){ &B3_cache[0], { 64, 1 } },(struct exo_win_2f32){ &C[(264 * (M / 264)) * N + 64 * jo], { N, 1 } });
+    }
+  }
+}
+if (M % 264 > 0) {
+  if (N % 64 > 0) {
+    for (int_fast32_t ko = 0; ko < ((K) / (512)); ko++) {
+      static float B4_cache[512 * 64];
+      for (int_fast32_t i0 = 0; i0 < 512; i0++) {
+        for (int_fast32_t i1 = 0; i1 < N - 64 * ((N) / (64)); i1++) {
+          B4_cache[i0 * 64 + i1] = B[(i0 + 512 * ko) * N + 64 * (N / 64) + i1];
+        }
+      }
+      sgemm_above_kernel(ctxt,M % 264,N % 64,512,(struct exo_win_2f32c){ &A[(264 * (M / 264)) * K + 512 * ko], { K, 1 } },(struct exo_win_2f32c){ &B4_cache[0], { 64, 1 } },(struct exo_win_2f32){ &C[(264 * (M / 264)) * N + 64 * (N / 64)], { N, 1 } });
+    }
+  }
+}
+if (K % 512 > 0) {
+  for (int_fast32_t io = 0; io < ((M) / (264)); io++) {
+    for (int_fast32_t jo = 0; jo < ((N) / (64)); jo++) {
+      static float B5_cache[512 * 64];
+      for (int_fast32_t i0 = 0; i0 < K - 512 * ((K) / (512)); i0++) {
+        for (int_fast32_t i1 = 0; i1 < 64; i1++) {
+          B5_cache[i0 * 64 + i1] = B[(512 * (K / 512) + i0) * N + i1 + 64 * jo];
+        }
+      }
+      sgemm_above_kernel(ctxt,264,64,K % 512,(struct exo_win_2f32c){ &A[(264 * io) * K + 512 * (K / 512)], { K, 1 } },(struct exo_win_2f32c){ &B5_cache[0], { 64, 1 } },(struct exo_win_2f32){ &C[(264 * io) * N + 64 * jo], { N, 1 } });
+    }
+  }
+}
+if (K % 512 > 0) {
+  if (N % 64 > 0) {
+    for (int_fast32_t io = 0; io < ((M) / (264)); io++) {
+      static float B6_cache[512 * 64];
+      for (int_fast32_t i0 = 0; i0 < K - 512 * ((K) / (512)); i0++) {
+        for (int_fast32_t i1 = 0; i1 < N - 64 * ((N) / (64)); i1++) {
+          B6_cache[i0 * 64 + i1] = B[(512 * (K / 512) + i0) * N + 64 * (N / 64) + i1];
+        }
+      }
+      sgemm_above_kernel(ctxt,264,N % 64,K % 512,(struct exo_win_2f32c){ &A[(264 * io) * K + 512 * (K / 512)], { K, 1 } },(struct exo_win_2f32c){ &B6_cache[0], { 64, 1 } },(struct exo_win_2f32){ &C[(264 * io) * N + 64 * (N / 64)], { N, 1 } });
+    }
+  }
+}
+if (K % 512 > 0) {
+  if (M % 264 > 0) {
+    for (int_fast32_t jo = 0; jo < ((N) / (64)); jo++) {
+      static float B7_cache[512 * 64];
+      for (int_fast32_t i0 = 0; i0 < K - 512 * ((K) / (512)); i0++) {
+        for (int_fast32_t i1 = 0; i1 < 64; i1++) {
+          B7_cache[i0 * 64 + i1] = B[(512 * (K / 512) + i0) * N + i1 + 64 * jo];
+        }
+      }
+      sgemm_above_kernel(ctxt,M % 264,64,K % 512,(struct exo_win_2f32c){ &A[(264 * (M / 264)) * K + 512 * (K / 512)], { K, 1 } },(struct exo_win_2f32c){ &B7_cache[0], { 64, 1 } },(struct exo_win_2f32){ &C[(264 * (M / 264)) * N + 64 * jo], { N, 1 } });
+    }
+  }
+}
+if (K % 512 > 0) {
+  if (M % 264 > 0) {
+    if (N % 64 > 0) {
+      static float B8_cache[512 * 64];
+      for (int_fast32_t i0 = 0; i0 < K - 512 * ((K) / (512)); i0++) {
+        for (int_fast32_t i1 = 0; i1 < N - 64 * ((N) / (64)); i1++) {
+          B8_cache[i0 * 64 + i1] = B[(512 * (K / 512) + i0) * N + 64 * (N / 64) + i1];
+        }
+      }
+      sgemm_above_kernel(ctxt,M % 264,N % 64,K % 512,(struct exo_win_2f32c){ &A[(264 * (M / 264)) * K + 512 * (K / 512)], { K, 1 } },(struct exo_win_2f32c){ &B8_cache[0], { 64, 1 } },(struct exo_win_2f32){ &C[(264 * (M / 264)) * N + 64 * (N / 64)], { N, 1 } });
+    }
+  }
+}
+}
+
+// sgemm_kernel_avx512_1x4(
+//     K : size,
+//     A : [f32][1, K] @DRAM,
+//     B : [f32][K, 64] @DRAM,
+//     C : [f32][1, 64] @DRAM
+// )
+static void sgemm_kernel_avx512_1x4( void *ctxt, int_fast32_t K, struct exo_win_2f32c A, struct exo_win_2f32c B, struct exo_win_2f32 C ) {
+EXO_ASSUME(K >= 1);
+// assert stride(A, 1) == 1
+// assert stride(B, 1) == 1
+// assert stride(C, 1) == 1
+__m512 C_reg[1][4];
+for (int_fast32_t i = 0; i < 1; i++) {
+  for (int_fast32_t jo = 0; jo < 4; jo++) {
+    C_reg[i][jo] = _mm512_loadu_ps(&C.data[(i) * (C.strides[0]) + 16 * jo]);
+  }
+}
+for (int_fast32_t k = 0; k < K; k++) {
+  for (int_fast32_t i = 0; i < 1; i++) {
+    __m512 A_vec;
+    A_vec = _mm512_set1_ps(A.data[(i) * (A.strides[0]) + k]);
+    for (int_fast32_t jo = 0; jo < 4; jo++) {
+      __m512 B_vec;
+      B_vec = _mm512_loadu_ps(&B.data[(k) * (B.strides[0]) + 16 * jo]);
+      C_reg[i][jo] = _mm512_fmadd_ps(A_vec, B_vec, C_reg[i][jo]);
+    }
+  }
+}
+for (int_fast32_t i = 0; i < 1; i++) {
+  for (int_fast32_t jo = 0; jo < 4; jo++) {
+    _mm512_storeu_ps(&C.data[(i) * (C.strides[0]) + 16 * jo], C_reg[i][jo]);
+  }
+}
+}
+
+// sgemm_kernel_avx512_2x4(
+//     K : size,
+//     A : [f32][2, K] @DRAM,
+//     B : [f32][K, 64] @DRAM,
+//     C : [f32][2, 64] @DRAM
+// )
+static void sgemm_kernel_avx512_2x4( void *ctxt, int_fast32_t K, struct exo_win_2f32c A, struct exo_win_2f32c B, struct exo_win_2f32 C ) {
+EXO_ASSUME(K >= 1);
+// assert stride(A, 1) == 1
+// assert stride(B, 1) == 1
+// assert stride(C, 1) == 1
+__m512 C_reg[2][4];
+for (int_fast32_t i = 0; i < 2; i++) {
+  for (int_fast32_t jo = 0; jo < 4; jo++) {
+    C_reg[i][jo] = _mm512_loadu_ps(&C.data[(i) * (C.strides[0]) + 16 * jo]);
+  }
+}
+for (int_fast32_t k = 0; k < K; k++) {
+  for (int_fast32_t i = 0; i < 2; i++) {
+    __m512 A_vec;
+    A_vec = _mm512_set1_ps(A.data[(i) * (A.strides[0]) + k]);
+    for (int_fast32_t jo = 0; jo < 4; jo++) {
+      __m512 B_vec;
+      B_vec = _mm512_loadu_ps(&B.data[(k) * (B.strides[0]) + 16 * jo]);
+      C_reg[i][jo] = _mm512_fmadd_ps(A_vec, B_vec, C_reg[i][jo]);
+    }
+  }
+}
+for (int_fast32_t i = 0; i < 2; i++) {
+  for (int_fast32_t jo = 0; jo < 4; jo++) {
+    _mm512_storeu_ps(&C.data[(i) * (C.strides[0]) + 16 * jo], C_reg[i][jo]);
+  }
+}
+}
+
+// sgemm_kernel_avx512_3x4(
+//     K : size,
+//     A : [f32][3, K] @DRAM,
+//     B : [f32][K, 64] @DRAM,
+//     C : [f32][3, 64] @DRAM
+// )
+static void sgemm_kernel_avx512_3x4( void *ctxt, int_fast32_t K, struct exo_win_2f32c A, struct exo_win_2f32c B, struct exo_win_2f32 C ) {
+EXO_ASSUME(K >= 1);
+// assert stride(A, 1) == 1
+// assert stride(B, 1) == 1
+// assert stride(C, 1) == 1
+__m512 C_reg[3][4];
+for (int_fast32_t i = 0; i < 3; i++) {
+  for (int_fast32_t jo = 0; jo < 4; jo++) {
+    C_reg[i][jo] = _mm512_loadu_ps(&C.data[(i) * (C.strides[0]) + 16 * jo]);
+  }
+}
+for (int_fast32_t k = 0; k < K; k++) {
+  for (int_fast32_t i = 0; i < 3; i++) {
+    __m512 A_vec;
+    A_vec = _mm512_set1_ps(A.data[(i) * (A.strides[0]) + k]);
+    for (int_fast32_t jo = 0; jo < 4; jo++) {
+      __m512 B_vec;
+      B_vec = _mm512_loadu_ps(&B.data[(k) * (B.strides[0]) + 16 * jo]);
+      C_reg[i][jo] = _mm512_fmadd_ps(A_vec, B_vec, C_reg[i][jo]);
+    }
+  }
+}
+for (int_fast32_t i = 0; i < 3; i++) {
+  for (int_fast32_t jo = 0; jo < 4; jo++) {
+    _mm512_storeu_ps(&C.data[(i) * (C.strides[0]) + 16 * jo], C_reg[i][jo]);
+  }
+}
+}
+
+// sgemm_kernel_avx512_4x4(
+//     K : size,
+//     A : [f32][4, K] @DRAM,
+//     B : [f32][K, 64] @DRAM,
+//     C : [f32][4, 64] @DRAM
+// )
+static void sgemm_kernel_avx512_4x4( void *ctxt, int_fast32_t K, struct exo_win_2f32c A, struct exo_win_2f32c B, struct exo_win_2f32 C ) {
+EXO_ASSUME(K >= 1);
+// assert stride(A, 1) == 1
+// assert stride(B, 1) == 1
+// assert stride(C, 1) == 1
+__m512 C_reg[4][4];
+for (int_fast32_t i = 0; i < 4; i++) {
+  for (int_fast32_t jo = 0; jo < 4; jo++) {
+    C_reg[i][jo] = _mm512_loadu_ps(&C.data[(i) * (C.strides[0]) + 16 * jo]);
+  }
+}
+for (int_fast32_t k = 0; k < K; k++) {
+  for (int_fast32_t i = 0; i < 4; i++) {
+    __m512 A_vec;
+    A_vec = _mm512_set1_ps(A.data[(i) * (A.strides[0]) + k]);
+    for (int_fast32_t jo = 0; jo < 4; jo++) {
+      __m512 B_vec;
+      B_vec = _mm512_loadu_ps(&B.data[(k) * (B.strides[0]) + 16 * jo]);
+      C_reg[i][jo] = _mm512_fmadd_ps(A_vec, B_vec, C_reg[i][jo]);
+    }
+  }
+}
+for (int_fast32_t i = 0; i < 4; i++) {
+  for (int_fast32_t jo = 0; jo < 4; jo++) {
+    _mm512_storeu_ps(&C.data[(i) * (C.strides[0]) + 16 * jo], C_reg[i][jo]);
+  }
+}
+}
+
+// sgemm_kernel_avx512_5x4(
+//     K : size,
+//     A : [f32][5, K] @DRAM,
+//     B : [f32][K, 64] @DRAM,
+//     C : [f32][5, 64] @DRAM
+// )
+static void sgemm_kernel_avx512_5x4( void *ctxt, int_fast32_t K, struct exo_win_2f32c A, struct exo_win_2f32c B, struct exo_win_2f32 C ) {
+EXO_ASSUME(K >= 1);
+// assert stride(A, 1) == 1
+// assert stride(B, 1) == 1
+// assert stride(C, 1) == 1
+__m512 C_reg[5][4];
+for (int_fast32_t i = 0; i < 5; i++) {
+  for (int_fast32_t jo = 0; jo < 4; jo++) {
+    C_reg[i][jo] = _mm512_loadu_ps(&C.data[(i) * (C.strides[0]) + 16 * jo]);
+  }
+}
+for (int_fast32_t k = 0; k < K; k++) {
+  for (int_fast32_t i = 0; i < 5; i++) {
+    __m512 A_vec;
+    A_vec = _mm512_set1_ps(A.data[(i) * (A.strides[0]) + k]);
+    for (int_fast32_t jo = 0; jo < 4; jo++) {
+      __m512 B_vec;
+      B_vec = _mm512_loadu_ps(&B.data[(k) * (B.strides[0]) + 16 * jo]);
+      C_reg[i][jo] = _mm512_fmadd_ps(A_vec, B_vec, C_reg[i][jo]);
+    }
+  }
+}
+for (int_fast32_t i = 0; i < 5; i++) {
+  for (int_fast32_t jo = 0; jo < 4; jo++) {
+    _mm512_storeu_ps(&C.data[(i) * (C.strides[0]) + 16 * jo], C_reg[i][jo]);
+  }
+}
+}
+
+// sgemm_kernel_avx512_6x4(
+//     K : size,
+//     A : [f32][6, K] @DRAM,
+//     B : [f32][K, 64] @DRAM,
+//     C : [f32][6, 64] @DRAM
+// )
+static void sgemm_kernel_avx512_6x4( void *ctxt, int_fast32_t K, struct exo_win_2f32c A, struct exo_win_2f32c B, struct exo_win_2f32 C ) {
+EXO_ASSUME(K >= 1);
+// assert stride(A, 1) == 1
+// assert stride(B, 1) == 1
+// assert stride(C, 1) == 1
+__m512 C_reg[6][4];
+for (int_fast32_t i = 0; i < 6; i++) {
+  for (int_fast32_t jo = 0; jo < 4; jo++) {
+    C_reg[i][jo] = _mm512_loadu_ps(&C.data[(i) * (C.strides[0]) + 16 * jo]);
+  }
+}
+for (int_fast32_t k = 0; k < K; k++) {
+  for (int_fast32_t i = 0; i < 6; i++) {
+    __m512 A_vec;
+    A_vec = _mm512_set1_ps(A.data[(i) * (A.strides[0]) + k]);
+    for (int_fast32_t jo = 0; jo < 4; jo++) {
+      __m512 B_vec;
+      B_vec = _mm512_loadu_ps(&B.data[(k) * (B.strides[0]) + 16 * jo]);
+      C_reg[i][jo] = _mm512_fmadd_ps(A_vec, B_vec, C_reg[i][jo]);
+    }
+  }
+}
+for (int_fast32_t i = 0; i < 6; i++) {
+  for (int_fast32_t jo = 0; jo < 4; jo++) {
+    _mm512_storeu_ps(&C.data[(i) * (C.strides[0]) + 16 * jo], C_reg[i][jo]);
+  }
+}
+}
+

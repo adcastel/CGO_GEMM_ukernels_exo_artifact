@@ -1,0 +1,48 @@
+def foo(n: size, m: size, x: i8 @ DRAM):
+    for i in seq(0, n):
+        for j in seq(0, m):
+            pass
+    for q in seq(0, 30):
+        for i in seq(0, n):
+            for j in seq(0, m):
+                a: i8[n] @ DRAM
+                x = a[i]
+    for i in seq(0, n):
+        for j in seq(0, m):
+            pass
+def foo(n: size, m: size, x: i8 @ DRAM):
+    for i in seq(0, n):
+        for j in seq(0, m):
+            pass
+    for q in seq(0, 30):
+        for i in seq(0, n):
+            for j in seq(0, m):
+                a: i8[40 + 1] @ DRAM
+                x = a[10]
+    for i in seq(0, n):
+        for j in seq(0, m):
+            pass
+def foo(n: size, m: size, x: i8 @ DRAM):
+    for i in seq(0, n):
+        for j in seq(0, m):
+            pass
+    for q in seq(0, 30):
+        for i in seq(0, n):
+            for j in seq(0, m):
+                a: i8[n + m] @ DRAM
+                x = a[i]
+    for i in seq(0, n):
+        for j in seq(0, m):
+            pass
+def foo(n: size, m: size, x: i8 @ DRAM):
+    for i in seq(0, n):
+        for j in seq(0, m):
+            pass
+    for q in seq(0, 30):
+        for i in seq(0, n):
+            for j in seq(0, m):
+                a: i8[n] @ DRAM
+                x = a[n - 1]
+    for i in seq(0, n):
+        for j in seq(0, m):
+            pass
