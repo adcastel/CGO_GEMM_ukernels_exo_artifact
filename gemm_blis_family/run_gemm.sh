@@ -28,14 +28,16 @@ TEST=N
 VISUAL=0
 #-------------------------------------------------------------
 
+mkdir -p output
 
 if $(echo $1 | grep -q "batch"); then 
 	source $1
 else
-	source batch/null.sh
+	source batch/.null.sh
 fi
 
 
 taskset -c 1 ./build/test_gemm.x "" "C" "C" "C" "N" "N" $ALPHA $BETA $MMIN $MMAX $MSTEP $NMIN $NMAX $NSTEP $KMIN $KMAX $KSTEP $VISUAL $TIMIN $TEST $1 $2
+
 #./build/test_gemm.x "" $ORDERA $ORDERB $ORDERC $TRANSA $TRANSB $ALPHA $BETA $MMIN $MMAX $MSTEP $NMIN $NMAX $NSTEP $KMIN $KMAX $KSTEP $VISUAL $TIMIN $TEST $1 $2
 

@@ -1,5 +1,5 @@
 CFLAGS ?= -O3 -march=armv8.2-a+simd+fp+fp16fml
-CC=gcc-10
+CC=gcc
 
 all: uk_exo 
 

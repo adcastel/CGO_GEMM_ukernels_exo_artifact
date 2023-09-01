@@ -2,7 +2,7 @@
 ##BLISHOME=$(HOME)/EXO_artifact/opt/blis
 BLISFLAGS := -I${BLISHOME}/include/blis/ -L/${BLISHOME}/lib/ -lblis -lm
 OMPFLAGS := 
-CC := gcc-10 
+CC := gcc
 CFLAGS := -O3 -march=armv8.2-a+simd+fp+fp16fml 
 CFLAGS += -DFP32
 
