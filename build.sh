@@ -16,7 +16,6 @@ if [ $gcc_v -lt $gcc_min ]; then
     echo "Update gcc version to 10.0.0 or higher"
     exit 1
 fi
-
 echo "[*] gcc OK"
 
 if ! hash python3; then
@@ -29,15 +28,19 @@ if [ "$ver" -lt "39" ]; then
     echo "This script requires python 3.9 or greater"
     exit 1
 fi
-
 echo "[*] python3 OK"
 
 if ! hash pip3; then
     echo "pip3 is not installed"
     exit 1
 fi
-
 echo "[*] pip3 OK"
+
+if ! hash gnuplot; then
+    echo "gnuplot is not installed"
+    exit 1
+fi
+echo "[*] gnuplot OK"
 
 echo "###################################"
 echo "Building Exo. This may take a while..."
