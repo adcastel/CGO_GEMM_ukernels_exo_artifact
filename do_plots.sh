@@ -10,5 +10,7 @@ do
 
 done
 
+mkdir -p plots
+
 gnuplot plotting.p 
 
