@@ -98,6 +98,9 @@ int main(int argc, char * argv []){
 	int i;
 	double t1, t2, time, tmin, flops, GFLOPS;
         
+	FILE *fd_csv;
+
+         	
 	const cntx_t * cntx;
         auxinfo_t  aux;
 #if defined(FP32)
@@ -113,7 +116,11 @@ int main(int argc, char * argv []){
 	kmax  = atoi(argv[5]);
 	kstep = atoi(argv[6]);
 	tmin   = atof(argv[7]);
-
+	
+        char name_file [30];
+        sprintf(name_file,"output/%s_%d_%d.dat",argv[1],MR,NR);	
+	fd_csv = fopen(name_file, "w");
+         fprintf(fd_csv, "#%s %d %d %s\n",argv[1],MR,NR, "GFLOPS");
  printf("# ============================================================================================");
    printf("\n");
      printf("# Driver for the evaluation of uGEMM\n");
@@ -280,7 +287,8 @@ int main(int argc, char * argv []){
 	} //k
 	} //n
 	} //m
-	
+	 fprintf(fd_csv, "%f\n", GFLOPS);
+	 fclose(fd_csv);
        printf("# End of program...\n");
          printf("# ============================================================================================");
 	   printf("\n");
