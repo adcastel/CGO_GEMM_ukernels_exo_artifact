@@ -55,4 +55,9 @@ test_uk_blis
 test_gemm.x
 *.swp
 *.pc
+
 plots/*
+driver_microkernel/output/*
+gemm_blis_family/build/*
+gemm_blis_family/output/*
+
