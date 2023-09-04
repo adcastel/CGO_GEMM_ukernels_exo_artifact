@@ -55,3 +55,4 @@ test_uk_blis
 test_gemm.x
 *.swp
 *.pc
+plots/*

@@ -1,0 +1,11 @@
+prefix=/home/martineh/workspace/CGO_paper44_artifact/opt/blis
+exec_prefix=/home/martineh/workspace/CGO_paper44_artifact/opt/blis
+libdir=/home/martineh/workspace/CGO_paper44_artifact/opt/blis/lib
+includedir=/home/martineh/workspace/CGO_paper44_artifact/opt/blis/include
+
+Name: BLIS
+Description: BLAS-like Library Instantiation Software Framework
+Version: 0.9.0
+Libs: -L${libdir} -lblis
+Libs.private:  -lm -lpthread -lrt
+Cflags: -I${includedir}/blis
