@@ -7,3 +7,6 @@
 
 #For Neon microkernels
 - GCC 10 or higher
+
+#For plotting
+- Gnuplot
