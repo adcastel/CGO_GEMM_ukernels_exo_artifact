@@ -9,13 +9,13 @@ set boxwidth 1
 set grid ytics
 
 set key top left box Left reverse width 2
-set yrange [0:35]
+#set yrange [0:35]
 
 set title "Gemm algorithm - Single core" font "Helvetica-Bold,22"
 set output "plots/figure14.eps"
 set ylabel font ",22" "GFLOPS" 
 set xlabel font ",22" "Matrix dimensions (M=N=K)"
-plot "./gemm_blis_family/output/square.dat" using 2:xtic(1) t "ALG+NEON" lc 6, \
+plot "./gemm_blis_family/output/square.dat" using 2:xtic(2) t "ALG+NEON" lc 6, \
       '' u 3 t "ALG+BLIS" lc 2, \
       '' u 5 t "BLIS" lc 4, \
       '' u 4 t "ALG+EXO" lc 1, \
