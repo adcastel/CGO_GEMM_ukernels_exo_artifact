@@ -6,7 +6,8 @@ echo "#############################################"
 
 cd gemm_blis_family 
 export LD_LIBRARY_PATH=/${BLISHOME}/lib/:$LD_LIBRARY_PATH
-for RM in FAMILY FAMILY_BLIS FAMILY_EXO BLIS
+#for RM in FAMILY_BLIS FAMILY BLIS FAMILY_EXO
+for RM in BLIS
 do
   make clean
   if [ $RM == "FAMILY_EXO" ]; then
@@ -16,9 +17,10 @@ do
   fi
   make RUN_MODE=$RM SIMD_MODE=$SM 
   echo "Starting on ${RM} and ${SM} mode"
+  ./run_gemm.sh cnn_models/square_small.dat output/square_small_${RM}.dat
   ./run_gemm.sh cnn_models/square.dat output/square_${RM}.dat
   ./run_gemm.sh cnn_models/resnet50.blis.dat output/resnet50_${RM}.dat
-  ./run_gemm.sh cnn_models/vgg16.blis.dat output/vgg16_${RM}.dat
+#  ./run_gemm.sh cnn_models/vgg16.blis.dat output/vgg16_${RM}.dat
   echo "End of ${RM} and ${SM} mode"
 done
 cd ..

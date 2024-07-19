@@ -56,7 +56,7 @@ ifeq ($(SIMD_MODE), ARMv8)
 else ifeq ($(SIMD_MODE), ARMv8_EXO)
   SIMD  = -DARMv8_EXO
   FLAGS = -O3 -march=armv8-a+simd+fp
-  _OBJ += uk_exo.o 
+  _OBJ += exo_matrix.o kernel_col.o 
 else
   FLAGS = -O3 
 endif
@@ -67,8 +67,8 @@ ifeq ($(RUN_MODE), FAMILY_BLIS)
     MR=8
     NR=12
   else ifeq ($(SIMD_MODE), ARMv8_EXO)
-    MR=8
-    NR=12
+    MR=12
+    NR=8
   else
   endif	
 endif

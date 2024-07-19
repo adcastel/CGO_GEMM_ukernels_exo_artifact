@@ -42,15 +42,15 @@ if ! hash gnuplot; then
 fi
 echo "[*] gnuplot OK"
 
-echo "###################################"
-echo "Building Exo. This may take a while..."
-echo "###################################"
-cd exo
-python3 -m pip install -U setuptools wheel pytest attr
-python3 -m pip install -r requirements.txt
-python3 -m build
-pip3 install dist/*.whl
-cd ..
+#echo "###################################"
+#echo "Building Exo. This may take a while..."
+#echo "###################################"
+#cd exo
+#python3 -m pip install -U setuptools wheel pytest attr
+#python3 -m pip install -r requirements.txt
+#python3 -m build
+#pip3 install dist/*.whl
+#cd ..
 
 echo "###################################"
 echo "Building Blis"

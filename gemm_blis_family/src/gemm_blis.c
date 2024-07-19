@@ -42,12 +42,20 @@ void gemm_blis_B3A2C0( char orderA, char orderB, char orderC,
 		       DTYPE beta,  DTYPE *C, size_t ldC, 
 		       DTYPE *Ac, DTYPE *Bc, 
                        size_t MC, size_t NC, size_t KC,
-		       const cntx_t * cntx, auxinfo_t * aux, gemm_ukr_ft gemm_kernel) {
-  size_t    ic, jc, pc, mc, nc, kc, ir, jr, mr, nr; 
+		       const cntx_t * cntx, auxinfo_t * aux, gemm_ukr_ft gemm_kernel
+#if defined(FAMILY_EXO)
+		       ,  ukrFunction**** ukrmatrix) {
+#else
+	){
+#endif  
+
+size_t    ic, jc, pc, mc, nc, kc, ir, jr, mr, nr; 
   DTYPE  zero = 0.0, one = 1.0, betaI; 
   DTYPE  *Aptr, *Bptr, *Cptr;
-
-  #if defined(CHECK)
+#if defined(FAMILY_EXO)
+   ukrFunction ukr;
+#endif
+#if defined(CHECK)
   #include "check_params.h"
   #endif
    
@@ -107,20 +115,16 @@ void gemm_blis_B3A2C0( char orderA, char orderB, char orderC,
               Cptr = &Crow(ic+ir,jc+jr);
 
             #if defined(FAMILY_EXO)
-	    if (mr == 8 && nr == 12)
-                uk_8x12_a1True_b1True( NULL, kc, &alpha,  &Ac[ir*kc],  &Bc[jr*kc], &betaI, (struct exo_win_2f32){Cptr,{m,1}});
-	    else if (mr == 8 && nr == 4)
-                uk_8x4_a1True_b1True( NULL, kc, &alpha,  &Ac[ir*kc],  &Bc[jr*kc], &betaI, (struct exo_win_2f32){Cptr,{m,1}});
-	    else if(mr==8 && nr == 8)
-                uk_8x8_a1True_b1True( NULL, kc, &alpha,  &Ac[ir*kc],  &Bc[jr*kc], &betaI, (struct exo_win_2f32){Cptr,{m,1}});
-	    else if(mr==4 && nr == 12)
-                uk_4x12_a1True_b1True( NULL, kc, &alpha,  &Ac[ir*kc],  &Bc[jr*kc], &betaI, (struct exo_win_2f32){Cptr,{m,1}});
-	    else if (mr == 4 && nr == 8)
-                uk_4x8_a1True_b1True( NULL, kc, &alpha,  &Ac[ir*kc],  &Bc[jr*kc], &betaI, (struct exo_win_2f32){Cptr,{m,1}});
-	    else if (mr == 4 && nr == 4)
-                uk_4x4_a1True_b1True( NULL, kc, &alpha,  &Ac[ir*kc],  &Bc[jr*kc], &betaI, (struct exo_win_2f32){Cptr,{m,1}});
-	    else
-                uk_1xX_a1True_b1True( NULL, kc, &alpha,  &Ac[ir*kc],  &Bc[jr*kc], &betaI, Cptr);
+	    int be = (int)betaI;
+	     ukr = *ukrmatrix[mr][nr][be];
+	     ukr(NULL, kc, &alpha, 
+			     //(struct exo_win_2f32c){&Ac[ir*kc],{MR,1}},                                  
+			     &Ac[ir*kc],MR,                                  
+			     //(struct exo_win_2f32c){&Bc[jr*kc],{NR,1}},   
+			     &Bc[jr*kc],NR,   
+			     &beta,
+			     //(struct exo_win_2f32){Cptr,{m,1}});
+			     Cptr,ldC);
             #else
                 #if defined(FAMILY_BLIS)
 	         gemm_kernel(mr, nr, kc, &alpha, &Ac[ir*kc], &Bc[jr*kc], &betaI,  Cptr, 1, ldC, aux, cntx);

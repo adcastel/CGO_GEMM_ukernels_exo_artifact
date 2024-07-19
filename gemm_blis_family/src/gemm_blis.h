@@ -11,7 +11,8 @@
   #include "ARMv8/gemm_blis_neon_fp32.h"
 #elif ARMv8_EXO
   #include <arm_neon.h>
-  #include "ARMv8/uk_exo.h"
+  //#include "ARMv8/uk_exo.h"
+  #include "ARMv8/exo_matrix.h"
 #endif
 
 #include "blis.h"
@@ -33,8 +34,12 @@
 #define Mrow(a1,a2)  M[ (a1)*(ldM)+(a2) ]
 
 void gemm_blis_B3A2C0( char, char, char, char, char, size_t, size_t, size_t, DTYPE, DTYPE *, size_t, DTYPE *, size_t, DTYPE, DTYPE *, size_t, 
-		       DTYPE *, DTYPE *, size_t, size_t, size_t, const cntx_t *, auxinfo_t *, gemm_ukr_ft);
-
+		       DTYPE *, DTYPE *, size_t, size_t, size_t, const cntx_t *, auxinfo_t *, gemm_ukr_ft
+            #if defined(FAMILY_EXO)
+		       ,  ukrFunction**** ukrmatrix);
+            #else
+                     );
+#endif
 void gemm_base_Cresident( char, int, int, int, DTYPE, DTYPE *, int, DTYPE *, int, DTYPE, DTYPE *, int );
 void gemm_base_ABresident( char, char, int, int, int, DTYPE, DTYPE *, int, DTYPE *, int, DTYPE, DTYPE *, int );
 

@@ -169,57 +169,56 @@ int main(int argc, char *argv[]) {
 
   
   printf(" ===========================================================================================\n");
-  printf(" |                                  %sRUN CONFIGURATION %s                                     \n", COLOR_BOLDYELLOW, COLOR_RESET);
+  printf(" |                                  %sRUN CONFIGURATION %s                                     \n", COLOR_RESET, COLOR_RESET);
   printf(" ===========================================================================================\n");
   printf(" |  [*] Data Type    : ");
   #ifdef FP32
-    printf(" %sFloat%s                                                              \n", COLOR_BOLDWHITE, COLOR_RESET);
+    printf(" %sFloat%s                                                              \n", COLOR_RESET, COLOR_RESET);
   #else
-    printf(" %sUnknown%s                                                                            \n", COLOR_BOLDWHITE, COLOR_RESET);
+    printf(" %sUnknown%s                                                                            \n", COLOR_RESET, COLOR_RESET);
   #endif
   //----------------------------------------------------------------------------------------------------------------------
   printf(" |  [*] Mode Selected: ");
   #ifdef FAMILY
-    printf(" %sALG+NEON%s                                                             \n", COLOR_BOLDWHITE, COLOR_RESET);
+    printf(" %sALG+NEON%s                                                             \n", COLOR_RESET, COLOR_RESET);
   #elif FAMILY_BLIS
-    printf(" %sALG+BLIS %s                                                              \n", COLOR_BOLDWHITE, COLOR_RESET);
+    printf(" %sALG+BLIS %s                                                              \n", COLOR_RESET, COLOR_RESET);
   #elif FAMILY_EXO
-    printf(" %sALG+EXO %s                                                              \n", COLOR_BOLDWHITE, COLOR_RESET);
+    printf(" %sALG+EXO %s                                                              \n", COLOR_RESET, COLOR_RESET);
   #elif BLIS
-    printf(" %sBLIS%s                                                                               \n", COLOR_BOLDWHITE, COLOR_RESET);
+    printf(" %sBLIS%s                                                                               \n", COLOR_RESET, COLOR_RESET);
   #else
-    printf(" %sUnknown%s                                                                            \n", COLOR_BOLDWHITE, COLOR_RESET);
+    printf(" %sUnknown%s                                                                            \n", COLOR_RESET, COLOR_RESET);
   #endif
   //----------------------------------------------------------------------------------------------------------------------
   printf(" |  [*] SIMD Selected: ");
   #ifdef AVX2
-    printf(" %sAVX2%s                                                                \n", COLOR_BOLDWHITE, COLOR_RESET);
+    printf(" %sAVX2%s                                                                \n", COLOR_RESET, COLOR_RESET);
   #elif ARMv8
-    printf(" %sARMv8%s                                                              \n", COLOR_BOLDWHITE, COLOR_RESET);
+    printf(" %sARMv8%s                                                              \n", COLOR_RESET, COLOR_RESET);
   #elif ARMv8_EXO
-    printf(" %sARMv8_EXO%s                                                           \n", COLOR_BOLDWHITE, COLOR_RESET);
+    printf(" %sARMv8_EXO%s                                                           \n", COLOR_RESET, COLOR_RESET);
   #else
-    printf(" %sUnknown%s                                                             \n", COLOR_BOLDWHITE, COLOR_RESET);
+    printf(" %sUnknown%s                                                             \n", COLOR_RESET, COLOR_RESET);
   #endif
   //----------------------------------------------------------------------------------------------------------------------
-  printf(" |  [*] Dataset      :  %s%-24s%s                                           \n", COLOR_BOLDWHITE, argv[21], COLOR_RESET);
-  printf(" |  [*] Output       :  %s%-22s%s                                           \n", COLOR_BOLDWHITE, argv[22], COLOR_RESET);
+  printf(" |  [*] Dataset      :  %s%-24s%s                                           \n", COLOR_RESET, argv[21], COLOR_RESET);
+  printf(" |  [*] Output       :  %s%-22s%s                                           \n", COLOR_RESET, argv[22], COLOR_RESET);
   //----------------------------------------------------------------------------------------------------------------------
   #ifndef BLIS
-    printf(" |  [*] MR           :  %s%-5d%s                                                              \n", COLOR_BOLDWHITE, MR, COLOR_RESET);
-    printf(" |  [*] NR           :  %s%-5d%s                                                              \n", COLOR_BOLDWHITE, NR, COLOR_RESET);
+    printf(" |  [*] MR           :  %s%-5d%s                                                              \n", COLOR_RESET, MR, COLOR_RESET);
+    printf(" |  [*] NR           :  %s%-5d%s                                                              \n", COLOR_RESET, NR, COLOR_RESET);
   #endif
   //----------------------------------------------------------------------------------------------------------------------
-  printf(" |  [*] Tmin         :  %s%-5.2f%s                                                              \n", COLOR_BOLDWHITE, tmin, COLOR_RESET);
+  printf(" |  [*] Tmin         :  %s%-5.2f%s                                                              \n", COLOR_RESET, tmin, COLOR_RESET);
   printf(" ------------------------------------------------------------------------------------------\n");
 
-
-  printf("\n"); 
-  printf(" ==========================================================================================\n");
-  printf(" |                           %sDRIVER FOR THE EVALUATION OF GEMM%s                            |\n", COLOR_BOLDYELLOW, COLOR_RESET);
-  printf(" ==========================================================================================\n");
-  printf(" |  %sOrder  Trans      M       N      K     MC      NC     KC%s   |    %sTime      GFLOPS%s      |\n", COLOR_BOLDWHITE, COLOR_RESET, COLOR_BOLDWHITE, COLOR_RESET );
-  printf(" ------------------------------------------------------------------------------------------\n");
+  printf("\n");
+  printf(" ===========================================================================================================\n");
+  printf(" |                                   %sDRIVER FOR THE EVALUATION OF GEMM%s                                     |\n", COLOR_RESET, COLOR_RESET);
+  printf(" ===========================================================================================================\n");
+  printf(" |  %sOrder  Trans      M       N      K     MC      NC     KC%s   |    %sTime      GFLOPS      Error%s  |   %sPASS%s  |\n", COLOR_RESET, COLOR_RESET, COLOR_RESET, COLOR_RESET, COLOR_RESET, COLOR_RESET);
+  printf(" -----------------------------------------------------------------------------------------------------------\n");
 
 
   for (unsigned int cnn_i = 0; cnn_i < cnn_num; cnn_i++) {
@@ -333,8 +332,10 @@ int main(int argc, char *argv[]) {
 	      print_matrix( "Bi", orderB, n, k, B, ldB );
 	    print_matrix( "Ci", orderC, m, n, C, ldC );
 	  }
-	  
-	  
+ #if defined(FAMILY_EXO) 
+	  ukrFunction**** ukrmatrix = allocateMatrix();
+	  fillMatrix(ukrmatrix);
+#endif
 	  time  = 0.0; 
 	  t1    = dclock();
 	  nreps = 0;
@@ -342,7 +343,12 @@ int main(int argc, char *argv[]) {
 	    nreps++;
             #if defined(FAMILY) || defined(FAMILY_BLIS) || defined(FAMILY_EXO)
 	      gemm_blis_B3A2C0( orderA, orderB, orderC, transA, transB, m, n, k, alpha, A, ldA, B, ldB, beta, C, ldC, 
-	      		        Ac, Bc, mc, nc, kc, cntx, &aux, gemm_kernel);
+	      		        Ac, Bc, mc, nc, kc, cntx, &aux, gemm_kernel
+#if defined(FAMILY_EXO)
+				,  ukrmatrix);
+#else
+	      );
+#endif
             #else
 	      sgemm_("No transpose", "No transpose", (void *)&m, (void *)&n, (void *)&k, &alpha, A, (void *)&ldA, B, 
 		    (void *)&ldB, &beta, C, (void *)&ldC);
@@ -395,10 +401,19 @@ int main(int argc, char *argv[]) {
           #ifdef BLIS
 	  mc = 0; nc = 0; kc = 0;
           #endif
-	  printf(" |   %c%c%c    %c%c     %6zu %6zu %6zu %6zu %6zu %6zu   |  %8.2e %10.2e     |", 
-		 orderA, orderB, orderC, transA, transB, m, n, k, mc, nc, kc, time, GFLOPS );
+	  printf(" |   %c%c%c    %c%c     %6zu %6zu %6zu %6zu %6zu %6zu   |  %8.2e %10.2e %10.2e |", 
+			  		 orderA, orderB, orderC, transA, transB, m, n, k, mc, nc, kc, time, GFLOPS, error );
 	  
+	  if ( test=='T' ) {
+		  if ( error<errorthd )   
+			  printf("%s    OK   %s|", COLOR_RESET, COLOR_RESET);   
+		  else {
+			  printf("%s  ERROR  %s|", COLOR_RESET,COLOR_RESET);   
+		  }
+	  } else
+		  printf("%s    -    %s|", COLOR_RESET, COLOR_RESET); 
 	  printf("\n");
+	  
 	  if (cnn_enable)
 	    fprintf(fd_csv, "%d;%zu;%zu;%zu;%.2e\n", testConf->cnn[cnn_i].layer, m, n, k, GFLOPS);
 	  //else
