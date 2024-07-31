@@ -111,7 +111,7 @@ RANLIB            := ranlib
 AR                := ar
 
 # Python Interpreter
-PYTHON            := python
+PYTHON            := python3
 
 # Preset (required) CFLAGS and LDFLAGS. These variables capture the value
 # of the CFLAGS and LDFLAGS environment variables at configure-time (and/or
@@ -146,7 +146,7 @@ PRAGMA_OMP_SIMD   := yes
 # then assigning them to their final INSTALL_* variables, we allow prefix and
 # exec_prefix to be used in the definitions of exec_prefix, libdir,
 # includedir, and sharedir.
-prefix              := /home/martineh/workspace/CGO_paper44_artifact/opt/blis
+prefix              := /home/adcastel/EXO/ukernels/CGO_paper44_artifact/opt/blis
 exec_prefix         := ${prefix}
 libdir              := ${exec_prefix}/lib
 includedir          := ${prefix}/include
